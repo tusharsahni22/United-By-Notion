@@ -1,40 +1,61 @@
 const UserCredentials = require("../database/users");
 const jwt = require("jsonwebtoken");
 
-tokenGenrate =  async(email,password) => {
-  const token = await jwt.sign({email,password}, "secretKey", {expiresIn: "300 seconds",});
-return token
-
-  
+tokenGenrate = async (email, password) => {
+  const token = await jwt.sign({ email, password }, "secretKey", {
+    expiresIn: "300 seconds",
+  });
+  return token;
 };
 
-const auth = async (req,res,next) => {
+const singUp = async (req, res, next) => {
   const userData = new UserCredentials({
     email: req.body.email,
     password: req.body.password,
   });
-token = await tokenGenrate(userData.email,userData.password)
-console.log(token)
+ // checking if user is already exist
+  let alreadyUserCheck = await UserCredentials.findOne({
+    email: userData.email,
+  });
 
-  
-  
+  if (alreadyUserCheck) {
+    res.send("User already exits");
+  } else {
+
+    // jwt token genration
+    token = await tokenGenrate(userData.email, userData.password);
+    // saving user in database
+
     await userData.save().then(() => {
-        res.json({"message":"Token sucessfully genrated","acessToken":token});
-      })
-      .catch((err) => {
+        res.json({ message: "Token sucessfully genrated", acessToken: token });
+      
+    }).catch((err) => {
         console.log(err);
       });
-
-
-
+    }
 };
 
-// const authVerify = async (token)=>{
+authVerify = async (req,res,next)=>{
 
-//     const VerifyToken = jwt.verify(token,"secretKey")
+    const userData = new UserCredentials({
+        email: req.body.email,
+        password: req.body.password,
+      });
 
-//     console.log(VerifyToken)
-// }
-// authVerify()
+      let alreadyUserCheck = await UserCredentials.findOne({
+        email: userData.email,password:userData.password
+      });
+      if (alreadyUserCheck) {
+        token = await tokenGenrate(userData.email, userData.password);
+        res.send(token)         
+        }else{
+            res.send("Invalid Credentials")
+        }   
+        
+      } 
+    
+      
+    
 
-module.exports = { auth };
+
+module.exports = { authVerify,singUp };

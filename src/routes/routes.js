@@ -1,13 +1,13 @@
 const express =require("express")
 const router = express.Router();
 const {getPostDetails} = require("../controller/SocialMedia")
-const {auth} =require("../controller/auth")
+const {authVerify} =require("../controller/auth")
 
 
 
 router.use(express.json())
 
 router.route("/getdetails").get(getPostDetails)
-router.route("/authenticate").post(auth)
+router.route("/authenticate").post(authVerify)
 
 module.exports = router;
