@@ -4,7 +4,7 @@ require("./database/connection")
 const allRoutes = require("./routes/routes")
 const port = process.env.PORT || 3000
 
-app.use("/user",allRoutes)
+app.use("/api",allRoutes)
 
 
 const start = async(req,res)=>{
