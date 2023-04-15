@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
-        validator(value){
+        validator(){
             if(!isEmail){
                 throw new error("Invaild Email")
             }

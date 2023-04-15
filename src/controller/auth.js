@@ -1,14 +1,17 @@
 const UserCredentials = require("../database/users");
 const jwt = require("jsonwebtoken");
 
-tokenGenrate = async (email, password) => {
-  const token = await jwt.sign({ email, password }, "secretKey", {
-    expiresIn: "300 seconds",
+tokenGenrate = async (_id) => {
+  const token = await jwt.sign({_id}, "secretKey", {
+    expiresIn: "24h",
   });
-  return token;
+  return token
 };
 
-const singUp = async (req, res, next) => {
+const singUp = async (req,res) => {
+  if(!req.body.email || !req.body.password){
+    return res.send("Please fill all the details")
+  }
   const userData = new UserCredentials({
     email: req.body.email,
     password: req.body.password,
@@ -21,21 +24,17 @@ const singUp = async (req, res, next) => {
   if (alreadyUserCheck) {
     res.send("User already exits");
   } else {
-
-    // jwt token genration
-    token = await tokenGenrate(userData.email, userData.password);
     // saving user in database
-
+    
     await userData.save().then(() => {
-        res.json({ message: "Token sucessfully genrated", acessToken: token });
-      
-    }).catch((err) => {
+      res.json({ message: "SingUp Sucessfull please Login"});   
+      }).catch((err) => {
         console.log(err);
       });
     }
 };
 
-authVerify = async (req,res,next)=>{
+const Login = async (req,res)=>{
 
     const userData = new UserCredentials({
         email: req.body.email,
@@ -46,7 +45,7 @@ authVerify = async (req,res,next)=>{
         email: userData.email,password:userData.password
       });
       if (alreadyUserCheck) {
-        token = await tokenGenrate(userData.email, userData.password);
+        token = await tokenGenrate(alreadyUserCheck._id);
         res.send(token)         
         }else{
             res.send("Invalid Credentials")
@@ -58,4 +57,4 @@ authVerify = async (req,res,next)=>{
     
 
 
-module.exports = { authVerify,singUp };
+module.exports = { Login,singUp };
