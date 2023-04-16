@@ -26,7 +26,9 @@ const makePost = async (req, res) => {
 const all_posts = async (req, res) => {
   await postModel
     .find({ postedBy: req.user._id })
-    .populate("postedBy")
+    .populate("postedBy"," _id name")
+    .populate("likes"," _id name")
+    .populate("comments.postedBy"," _id name")
     .then((requestedData) => {
       res.send(requestedData);
     })
@@ -43,7 +45,7 @@ const likePost = async (req, res) => {
       $push: { likes: req.user._id },
     },
     { new: true }
-  ).then((err, result) => {
+  ).then((result, err) => {
     if (err) {
       return res.json({ error: err });
     } else {
@@ -53,13 +55,9 @@ const likePost = async (req, res) => {
 };
 const unlikePost = async (req, res) => {
   postId = req.params.id;
-  await PostModel.findByIdAndUpdate(
-    postId,
-    {
-      $pull: { likes: req.user._id },
-    },
+  await PostModel.findByIdAndUpdate(postId,{$pull:{likes: req.user._id }},
     { new: true }
-  ).then((err, result) => {
+  ).then((result, err) => {
     if (err) {
       return res.json({ error: err });
     } else {
@@ -68,24 +66,30 @@ const unlikePost = async (req, res) => {
   });
 };
 const commentOnPost = async (req, res) => {
-     postId = req.params.id;
-     const comment = {
-          postedBy : req.params.id,
-          comment : req.body.comment
-     }
-     // not retuening comment going in error block
-  await PostModel.findByIdAndUpdate(postId,{$push: {comment}},
-    { new: true }
-  ).then((err, result) => {
-    if (err) {
-      return res.json({ error: err });
-    } else {
+  postId = req.params.id;
+  const comment = {
+    comment: req.body.comment,
+    postedBy: req.user.id,
+  };
+  await PostModel.findByIdAndUpdate(postId,{$push:{comments: comment}},{ new: true }
+     // .populate("comments.postedBy","_id name")
+     // .populate("postedBy","_id name")
+     )
+     .then((result) => {
       res.json(result);
-    }
-  });
+    }).catch((err) => {console.log(err)});
 };
+
+
 const followUser = async (req, res) => {
   res.send("working");
 };
 
-module.exports = { makePost, followUser, all_posts, likePost, unlikePost,commentOnPost };
+module.exports = {
+  makePost,
+  followUser,
+  all_posts,
+  likePost,
+  unlikePost,
+  commentOnPost,
+};

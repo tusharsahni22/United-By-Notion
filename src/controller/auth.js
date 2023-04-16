@@ -9,10 +9,11 @@ tokenGenrate = async (_id) => {
 };
 
 const singUp = async (req,res) => {
-  if(!req.body.email || !req.body.password){
+  if(!req.body.email || !req.body.password || !req.body.name){
     return res.send("Please fill all the details")
   }
   const userData = new UserCredentials({
+    name:req.body.name,
     email: req.body.email,
     password: req.body.password,
   });

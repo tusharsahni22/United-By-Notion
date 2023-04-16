@@ -20,7 +20,8 @@ const postSchema = mongoose.Schema({
     }],
     comments:[{
         comment:String,
-        postedBy:{type:ObjectId,ref:"UserCredentials"}
+        postedBy:{type:ObjectId,ref:"UserCredentials"},
+        postedAt:{type: Date,default: Date.now}
     }],
     createdAt:{
         type: Date, 
