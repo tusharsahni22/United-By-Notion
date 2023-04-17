@@ -22,7 +22,25 @@ const makePost = async (req, res) => {
       });
   }
 };
+const deletePost = async (req, res) => {
+    postId = req.params.id;
 
+  await postModel.findOne({_id:postId})
+    .populate("postedBy","_id")
+    .then((post,err)=>{
+        if(err || !post){
+            return res.status(422).json({error:err})
+        }
+   
+   if(post.postedBy._id.toString() === req.user._id.toString()){
+    postModel.findOneAndRemove({_id:postId})
+    .then(result=>{
+        res.json(result)
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }})
+}
 const all_posts = async (req, res) => {
   await postModel
     .find({ postedBy: req.user._id })
@@ -72,9 +90,9 @@ const commentOnPost = async (req, res) => {
     postedBy: req.user.id,
   };
   await PostModel.findByIdAndUpdate(postId,{$push:{comments: comment}},{ new: true }
-     // .populate("comments.postedBy","_id name")
-     // .populate("postedBy","_id name")
-     )
+    )
+     .populate("comments.postedBy","_id name")
+     .populate("postedBy","_id name")
      .then((result) => {
       res.json(result);
     }).catch((err) => {console.log(err)});
@@ -85,11 +103,4 @@ const followUser = async (req, res) => {
   res.send("working");
 };
 
-module.exports = {
-  makePost,
-  followUser,
-  all_posts,
-  likePost,
-  unlikePost,
-  commentOnPost,
-};
+module.exports = {  makePost,  followUser,  all_posts,  likePost,  unlikePost,  commentOnPost,deletePost};
