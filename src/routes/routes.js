@@ -1,6 +1,6 @@
 const express =require("express")
 const router = express.Router();
-const {makePost,followUser,all_posts,likePost,unlikePost,commentOnPost,deletePost} = require("../controller/SocialMedia")
+const {makePost,followUser,unfollowUser,all_posts,likePost,unlikePost,commentOnPost,deletePost} = require("../controller/SocialMedia")
 const {Login,singUp,userDetails} =require("../controller/auth")
 const {authTokenCheck} =require("../middleware/validator")
 
@@ -18,5 +18,6 @@ router.route("/like/:id").post(authTokenCheck ,likePost)
 router.route("/unlike/:id").post(authTokenCheck ,unlikePost)
 router.route("/comment/:id").post(authTokenCheck ,commentOnPost)
 router.route("/follow/:id").post(authTokenCheck ,followUser)
+router.route("/unfollow/:id").post(authTokenCheck ,unfollowUser)
 
 module.exports = router;

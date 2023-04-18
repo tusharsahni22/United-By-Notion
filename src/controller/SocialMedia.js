@@ -1,5 +1,5 @@
 const PostModel = require("../database/post");
-const postModel = require("../database/post");
+const UserCredentials = require("../database/users");
 
 const makePost = async (req, res) => {
   if (!req.body.title || !req.body.description) {
@@ -100,7 +100,24 @@ const commentOnPost = async (req, res) => {
 
 
 const followUser = async (req, res) => {
-  res.send("working");
+  // if(await UserCredentials.find({"following":req.body.params}===req.user._id))
+  await UserCredentials.findByIdAndUpdate(req.params.id,{$push:{"follower":req.user._id}},{new:true})
+    
+  await UserCredentials.findByIdAndUpdate(req.user._id,{$push:{"following":req.params.id}},{new:true}) 
+.then((result)=>{
+  res.send(result)
+}).catch((err)=>{
+  console.log(err)
+})
+}
+const unfollowUser = async (req, res) => {
+  await UserCredentials.findByIdAndUpdate(req.params.id,{$pull:{"follower":req.user._id}},{new:true})
+    
+  await UserCredentials.findByIdAndUpdate(req.user._id,{$pull:{"following":req.params.id}},{new:true}) 
+.then((result)=>{
+  res.send(result)
+}).catch((err)=>{
+  console.log(err)
+})
 };
-
-module.exports = {  makePost,  followUser,  all_posts,  likePost,  unlikePost,  commentOnPost,deletePost};
+module.exports = {  makePost,followUser,unfollowUser,all_posts,  likePost,  unlikePost,  commentOnPost,deletePost};
